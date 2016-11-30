@@ -8,11 +8,17 @@ class ArgumentParser:
 
     @staticmethod
     def parse_project(arg):
-        try:
-            project = int(arg)
-            return project
-        except:
-            raise BadFormatException("Faulty project format")
+
+        projects = ['apple', 'microsoft']
+
+        # if arg in projects:
+        #     return arg
+
+        for p in projects:
+            if p.find(arg.lower()) != -1:
+                return p
+
+        raise BadFormatException("Faulty project format")
 
     @staticmethod
     def parse_date(arg):
@@ -35,3 +41,16 @@ class ArgumentParser:
             return hours
         except:
             raise BadFormatException("Faulty hour format")
+
+    @staticmethod
+    def parse_week(arg):
+        try:
+            week = int(arg)
+            if ArgumentParser.__digits_in_int(week) in range(1,3):
+                return week
+        except:
+            pass
+
+    @staticmethod
+    def __digits_in_int(i):
+        return len(str(i))
