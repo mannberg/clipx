@@ -3,7 +3,9 @@ from datetime import datetime, date, timedelta
 class DateHandler:
 
     @staticmethod
-    def date_from_shortform(shortform):
+    def date_from_alias(alias):
+        alias = DateHandler.check_for_weekday_shortform(alias)
+
         try:
             return {
                 'today': DateHandler.today(),
@@ -16,9 +18,28 @@ class DateHandler:
                 'friday': DateHandler.date_from_weekday('friday'),
                 'saturday': DateHandler.date_from_weekday('saturday'),
                 'sunday': DateHandler.date_from_weekday('sunday')
-                }[shortform]
+                }[alias]
         except:
             return None
+
+    @staticmethod
+    def check_for_weekday_shortform(alias):
+        if alias in ['mon', 'monday']:
+            alias = 'monday'
+        elif alias in ['tue', 'tuesday']:
+            alias = 'tuesday'
+        elif alias in ['wed', 'wednesday']:
+            alias = 'wednesday'
+        elif alias in ['thu', 'thursday']:
+            alias = 'thursday'
+        elif alias in ['fri', 'friday']:
+            alias = 'friday'
+        elif alias in ['sat', 'saturday']:
+            alias = 'saturday'
+        elif alias in ['sun', 'sunday']:
+            alias = 'sunday'
+
+        return alias
 
     @staticmethod
     def date_from_string(string, frmt):
@@ -39,8 +60,11 @@ class DateHandler:
         return yesterday
 
     @staticmethod
-    def date_from_weekday(day):
+    def current_week():
+        return date.today().isocalendar()[1]
 
+    @staticmethod
+    def date_from_weekday(day):
         weekday = day.lower()
 
         weekdays = [
@@ -59,9 +83,6 @@ class DateHandler:
         today_index = datetime.today().weekday()
         weekday_index = weekdays.index(weekday)
         index_diff = weekday_index - today_index
-        print("index diff: " + str(index_diff))
-        today = date.today()
-
         new_date = date.today() + timedelta(days=index_diff)
 
         return new_date

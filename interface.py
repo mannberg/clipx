@@ -1,16 +1,15 @@
-import sys
 import actions
 
-def get_input():
-    args = get_args()
+def get_input(args):
+    del args[0]
     try:
-        verb = args.pop(0)
+        verb = get_action_argument(args)
         action = actions.get_action(str(verb))
         action.perform_if_valid_arguments(args)
     except IndexError:
-        print(usage_info())
+        print usage_info()
     except (actions.InvalidActionException, actions.IncorrectNumberOfArgumentsException) as e:
-        print(e.message)
+        print e.message
 
 def usage_info():
     return """\
@@ -19,7 +18,5 @@ def usage_info():
         del [hours] [date] [project name]
         """
 
-def get_args():
-    args = sys.argv
-    del args[0]
-    return args
+def get_action_argument(args):
+    return args.pop(0)

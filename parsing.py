@@ -11,9 +11,6 @@ class ArgumentParser:
 
         projects = ['apple', 'microsoft']
 
-        # if arg in projects:
-        #     return arg
-
         for p in projects:
             if p.find(arg.lower()) != -1:
                 return p
@@ -22,9 +19,9 @@ class ArgumentParser:
 
     @staticmethod
     def parse_date(arg):
-        shortform_date = DateHandler.date_from_shortform(arg)
-        if shortform_date is not None:
-            return shortform_date
+        date_from_alias = DateHandler.date_from_alias(arg)
+        if date_from_alias is not None:
+            return date_from_alias
 
         for frmt in ("%d-%m-%Y", "%d.%m.%Y", "%d/%m/%Y"):
             try:
@@ -44,6 +41,9 @@ class ArgumentParser:
 
     @staticmethod
     def parse_week(arg):
+        if str(arg) in ['tw']:
+            return DateHandler.current_week()
+
         try:
             week = int(arg)
             if ArgumentParser.__digits_in_int(week) in range(1,3):

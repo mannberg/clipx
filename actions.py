@@ -25,40 +25,40 @@ def get_action(arg):
     except:
         raise InvalidActionException("Action " + arg + " does not exist.")
 
-class Action:
-    pass
+class Action(object):
+
+    number_of_arguments = 0
+
+    def count_arguments(self, args):
+        if len(args) != self.number_of_arguments:
+            raise IncorrectNumberOfArgumentsException("Incorrect number of arguments.")
 
 class Add(Action):
 
     number_of_arguments = 3
     name = 'add'
 
-    def __count_arguments(self, args):
-        if len(args) != self.number_of_arguments:
-            raise IncorrectNumberOfArgumentsException("Incorrect number of arguments.")
-
     def perform_if_valid_arguments(self, args):
-        self.__count_arguments(args)
-        parsed_arguments = self.__parse_arguments(args)
+        super(Add, self).count_arguments(args)
+        parsed_arguments = self.__get_parsed_arguments(args)
         validated_args = self.__sanity_check_arguments(parsed_arguments)
-        self.__add(validated_args)
+        self.__perform(validated_args)
 
-    def __add(self, args):
-
+    def __perform(self, args):
         hours = args[0]
         date = args[1]
         project = args[2]
 
-        print("Added %d hours to project %s for date %s." % (hours, str(project), str(date)))
+        print "Added %d hours to project %s for date %s." % (hours, str(project), str(date))
 
-    def __parse_arguments(self, args):
+    def __get_parsed_arguments(self, args):
         try:
             hours = ArgumentParser.parse_hours(args[0])
             date = ArgumentParser.parse_date(args[1])
             project = ArgumentParser.parse_project(args[2])
             return [hours, date, project]
         except BadFormatException as e:
-            print(e.message)
+            print e.message
             sys.exit()
 
     def __sanity_check_arguments(self, args):
@@ -69,7 +69,7 @@ class Add(Action):
 
             return [hours, date, project]
         except BadValueException as e:
-            print(e.message)
+            print e.message
             sys.exit()
 
     def __sanity_check_hours(self, hours):
@@ -100,47 +100,54 @@ class Show(Action):
     number_of_arguments = range(1,3)
     name = 'show'
 
-    def __count_arguments(self, args):
+    def count_arguments(self, args):
         if len(args) not in self.number_of_arguments:
             raise IncorrectNumberOfArgumentsException("Incorrect number of arguments.")
 
     def perform_if_valid_arguments(self, args):
-        self.__count_arguments(args)
-        parsed_arguments = self.__parse_arguments(args)
+        self.count_arguments(args)
+        parsed_arguments = self.__get_parsed_arguments(args)
 
         if 'week' in parsed_arguments.keys():
-            print("Showing week " + str(parsed_arguments['week']) + " ...")
-            if 'project' in parsed_arguments.keys():
-                print("For project " + parsed_arguments['project'])
+            self.__show_week(str(parsed_arguments['week']))
         elif 'date' in parsed_arguments.keys():
-            print("Showing date " + str(parsed_arguments['date']))
+            self.__show_date(str(parsed_arguments['date']))
 
-    def __parse_arguments(self, args):
+        if 'project' in parsed_arguments.keys():
+            self.__show_project(parsed_arguments['project'])
+
+    def __show_week(self, week):
+        print "Showing week " + week + " ..."
+
+    def __show_date(self, date):
+        print "Showing date " + date
+
+    def __show_project(self, project):
+        print "For project " + project
+
+    def __add_project_to_dictionary(self, dict, args):
+        try:
+            project = ArgumentParser.parse_project(args[1])
+            dict['project'] = project
+        except IndexError:
+            pass
+
+        return dict
+
+    def __get_parsed_arguments(self, args):
         try:
             week = ArgumentParser.parse_week(args[0])
             if week is not None:
-                print("was week!")
-                dict = {'week': week}
-                try:
-                    project = ArgumentParser.parse_project(args[1])
-                    dict['project'] = project
-                except IndexError:
-                    print "no fucking second..."
+                dict = self.__add_project_to_dictionary({'week': week}, args)
 
                 return dict
 
             date = ArgumentParser.parse_date(args[0])
             if date is not None:
-                print("was date!")
-                dict = {'date': date}
-                try:
-                    project = ArgumentParser.parse_project(args[1])
-                    dict['project'] = project
-                except IndexError:
-                    print "no fucking second..."
+                dict = self.__add_project_to_dictionary({'date': date}, args)
 
                 return dict
 
         except BadFormatException as e:
-            print(e.message)
+            print e.message
             sys.exit()
