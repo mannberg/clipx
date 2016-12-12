@@ -49,7 +49,7 @@ class ArgumentParser:
             if ArgumentParser.__digits_in_int(week) in range(1,3):
                 return week
         except:
-            pass
+            raise BadFormatException("Faulty week format")
 
     @staticmethod
     def __digits_in_int(i):

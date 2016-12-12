@@ -3,12 +3,15 @@ import actions
 def get_input(args):
     del args[0]
     try:
-        verb = get_action_argument(args)
+        verb = action_argument(args)
         action = actions.get_action(str(verb))
         action.perform_if_valid_arguments(args)
     except IndexError:
         print usage_info()
-    except (actions.InvalidActionException, actions.IncorrectNumberOfArgumentsException) as e:
+    except (
+    actions.InvalidActionException,
+    actions.IncorrectNumberOfArgumentsException,
+    actions.BadValueException) as e:
         print e.message
 
 def usage_info():
@@ -18,5 +21,5 @@ def usage_info():
         del [hours] [date] [project name]
         """
 
-def get_action_argument(args):
+def action_argument(args):
     return args.pop(0)
