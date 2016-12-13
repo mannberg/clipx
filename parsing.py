@@ -42,10 +42,8 @@ class ArgumentParser:
             stripped_arg = arg[:index]
             return offset, stripped_arg
         except ValueError:
-            print "Fanns ej"
             return None, arg
         except IndexError:
-            print "Fanns ej + eller minus"
             return None, arg
 
     @staticmethod
