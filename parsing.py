@@ -19,17 +19,34 @@ class ArgumentParser:
 
     @staticmethod
     def parse_date(arg):
-        date_from_alias = DateHandler.date_from_alias(arg)
+        offset, stripped_arg = ArgumentParser.argument_has_offset(arg)
+        transformed_offset = DateHandler.offset_from_alias(stripped_arg, offset)
+        date_from_alias = DateHandler.date_from_alias(stripped_arg, transformed_offset)
         if date_from_alias is not None:
             return date_from_alias
 
         for frmt in ("%d-%m-%Y", "%d.%m.%Y", "%d/%m/%Y"):
             try:
-                return DateHandler.date_from_string(arg, frmt)
+                date = DateHandler.date_from_string(stripped_arg, frmt, transformed_offset)
+                return date
             except ValueError:
                 pass
 
         raise BadFormatException("Faulty date format")
+
+    @staticmethod
+    def argument_has_offset(arg):
+        try:
+            index = [i for i, v in enumerate(arg) if '+' in v or '-' in v][0]
+            offset = int(arg[index:])
+            stripped_arg = arg[:index]
+            return offset, stripped_arg
+        except ValueError:
+            print "Fanns ej"
+            return None, arg
+        except IndexError:
+            print "Fanns ej + eller minus"
+            return None, arg
 
     @staticmethod
     def parse_hours(arg):
@@ -41,12 +58,14 @@ class ArgumentParser:
 
     @staticmethod
     def parse_week(arg):
-        if str(arg) in ['tw']:
-            return DateHandler.current_week()
+        offset, stripped_arg = ArgumentParser.argument_has_offset(arg)
+        week_from_alias = DateHandler.week_from_alias(stripped_arg, offset)
+        if week_from_alias is not None:
+            return week_from_alias
 
         try:
-            week = int(arg)
-            if ArgumentParser.__digits_in_int(week) in range(1,3):
+            week = int(stripped_arg)
+            if week in range(1,53):
                 return week
         except:
             raise BadFormatException("Faulty week format")
