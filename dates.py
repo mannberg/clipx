@@ -5,10 +5,10 @@ class DateHandler:
     @staticmethod
     def date_from_alias(alias, offset=None):
 
-        alias = DateHandler.check_for_weekday_shortform(alias)
+        alias = DateHandler.weekday_from_alias(alias)
         if alias in DateHandler.weekdays():
             date = DateHandler.date_from_weekday(alias)
-            return DateHandler.date_with_offset(date, offset)
+            return DateHandler.date_with_day_offset(date, offset)
 
         try:
             date = {
@@ -16,7 +16,7 @@ class DateHandler:
                 'tomorrow': DateHandler.tomorrow(),
                 'yesterday': DateHandler.yesterday()
                 }[alias]
-            return DateHandler.date_with_offset(date, offset)
+            return DateHandler.date_with_day_offset(date, offset)
         except:
             return None
 
@@ -33,8 +33,8 @@ class DateHandler:
                     return None
 
     @staticmethod
-    def offset_from_alias(alias, offset):
-        alias = DateHandler.check_for_weekday_shortform(alias)
+    def day_offset_from_alias(alias, offset):
+        alias = DateHandler.weekday_from_alias(alias)
 
         if offset is None:
             return offset
@@ -48,7 +48,7 @@ class DateHandler:
         return offset
 
     @staticmethod
-    def check_for_weekday_shortform(alias):
+    def weekday_from_alias(alias):
         if alias in ['mon', 'monday']:
             return 'monday'
         elif alias in ['tue', 'tuesday']:
@@ -69,10 +69,10 @@ class DateHandler:
     @staticmethod
     def date_from_string(string, frmt, offset=None):
         date = datetime.strptime(string, frmt).date()
-        return date_with_offset(date, offset)
+        return DateHandler.date_with_day_offset(date, offset)
 
     @staticmethod
-    def date_with_offset(date, offset):
+    def date_with_day_offset(date, offset):
         if offset is not None:
             date = date + timedelta(days=offset)
         return date
@@ -114,7 +114,6 @@ class DateHandler:
     @staticmethod
     def date_from_weekday(day):
         weekday = day.lower()
-
         weekdays = DateHandler.weekdays()
 
         if weekday not in weekdays:
@@ -137,4 +136,4 @@ class DateHandler:
                 'friday',
                 'saturday',
                 'sunday'
-                    ]
+                ]

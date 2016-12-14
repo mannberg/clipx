@@ -4,23 +4,66 @@ class BadFormatException(Exception):
     def __init__(self, arg):
         self.message = arg
 
-class ArgumentParser:
+class NonExistentProjectException(Exception):
+    pass
+
+class Parser:
 
     @staticmethod
-    def parse_project(arg):
+    def week(arg):
+        """
+        >>> Parser.week("22")
+        22
 
-        projects = ['apple', 'microsoft']
+        >>> Parser.week(22)
+        22
 
-        for p in projects:
-            if p.find(arg.lower()) != -1:
-                return p
+        >>> tw = Parser.week('tw')
+        >>> isinstance(tw, int)
+        True
 
-        raise BadFormatException("Faulty project format")
+        >>> Parser.week('td')
+        Traceback (most recent call last):
+        ...
+        BadFormatException
+        """
+        arg = str(arg)
+        stripped_arg, offset = Parser.argument_with_offset(arg)
+        week_from_alias = DateHandler.week_from_alias(stripped_arg, offset)
+        if week_from_alias is not None:
+            return week_from_alias
+
+        try:
+            week = int(stripped_arg)
+            if week in range(1,53):
+                return week
+        except ValueError:
+            raise BadFormatException("Not a valid week")
 
     @staticmethod
-    def parse_date(arg):
-        offset, stripped_arg = ArgumentParser.argument_has_offset(arg)
-        transformed_offset = DateHandler.offset_from_alias(stripped_arg, offset)
+    def date(arg):
+        """
+        >>> Parser.date("22/10/2016")
+        datetime.date(2016, 10, 22)
+
+        >>> Parser.date("22/10/2016+1")
+        datetime.date(2016, 10, 23)
+
+        >>> Parser.date("22/10/2016-1")
+        datetime.date(2016, 10, 21)
+
+        >>> date = Parser.date("today-1")
+        >>> import datetime
+        >>> isinstance(date, datetime.date)
+        True
+
+        >>> date = Parser.date("thisday-1")
+        Traceback (most recent call last):
+        ...
+        BadFormatException
+        """
+        stripped_arg, offset = Parser.argument_with_offset(arg)
+        transformed_offset = DateHandler.day_offset_from_alias(stripped_arg, offset)
         date_from_alias = DateHandler.date_from_alias(stripped_arg, transformed_offset)
         if date_from_alias is not None:
             return date_from_alias
@@ -32,42 +75,85 @@ class ArgumentParser:
             except ValueError:
                 pass
 
-        raise BadFormatException("Faulty date format")
+        raise BadFormatException("Not a valid date")
 
     @staticmethod
-    def argument_has_offset(arg):
+    def argument_with_offset(arg):
+        """
+        >>> Parser.argument_with_offset("abc-10")
+        ('abc', -10)
+
+        >>> Parser.argument_with_offset("abc+3")
+        ('abc', 3)
+
+        >>> Parser.argument_with_offset("abc123")
+        ('abc123', None)
+
+        >>> Parser.argument_with_offset("+")
+        ('+', None)
+
+        >>> Parser.argument_with_offset("+++")
+        ('+++', None)
+
+        >>> Parser.argument_with_offset(2)
+        Traceback (most recent call last):
+        ...
+        BadFormatException
+        """
         try:
-            index = [i for i, v in enumerate(arg) if '+' in v or '-' in v][0]
-            offset = int(arg[index:])
-            stripped_arg = arg[:index]
-            return offset, stripped_arg
-        except ValueError:
-            return None, arg
-        except IndexError:
-            return None, arg
+            divisor_index = [i for i, v in enumerate(arg) if '+' in v or '-' in v][0]
+            offset = int(arg[divisor_index:])
+            stripped_arg = arg[:divisor_index]
+            return stripped_arg, offset
+        except (ValueError, IndexError):
+            return arg, None
+        except TypeError:
+            raise BadFormatException("Expected string, got int")
 
     @staticmethod
-    def parse_hours(arg):
+    def project(arg):
+        """
+        >>> Parser.project('pple')
+        'apple'
+
+        >>> Parser.project('xxx')
+        Traceback (most recent call last):
+        ...
+        NonExistentProjectException
+
+        >>> Parser.project(2)
+        Traceback (most recent call last):
+        ...
+        NonExistentProjectException
+        """
+
+        arg = str(arg)
+
+        projects = ['apple', 'microsoft']
+        for p in projects:
+            if p.find(arg.lower()) != -1:
+                return p
+
+        raise NonExistentProjectException()
+
+    @staticmethod
+    def hours(arg):
+        """
+        >>> Parser.hours(2)
+        2
+
+        >>> Parser.hours('abc')
+        Traceback (most recent call last):
+        ...
+        BadFormatException
+        """
         try:
             hours = int(arg)
             return hours
         except:
-            raise BadFormatException("Faulty hour format")
+            raise BadFormatException("Not valid hours")
 
-    @staticmethod
-    def parse_week(arg):
-        offset, stripped_arg = ArgumentParser.argument_has_offset(arg)
-        week_from_alias = DateHandler.week_from_alias(stripped_arg, offset)
-        if week_from_alias is not None:
-            return week_from_alias
 
-        try:
-            week = int(stripped_arg)
-            if week in range(1,53):
-                return week
-        except:
-            raise BadFormatException("Faulty week format")
-
-    @staticmethod
-    def __digits_in_int(i):
-        return len(str(i))
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

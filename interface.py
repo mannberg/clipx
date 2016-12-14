@@ -1,18 +1,53 @@
 import actions
 
-def get_input(args):
-    del args[0]
+"""Get input, show output"""
+
+class MissingArgumentException(Exception):
+    pass
+
+def parse_input(args):
     try:
-        verb = action_argument(args)
-        action = actions.get_action(str(verb))
-        action.perform_if_valid_arguments(args)
-    except IndexError:
+        action_name, args = action_name_with_arguments(args)
+        actions.execute(action_name, args)
+    except MissingArgumentException:
         print usage_info()
-    except (
-    actions.InvalidActionException,
-    actions.IncorrectNumberOfArgumentsException,
-    actions.BadValueException) as e:
+    except actions.InvalidActionException:
+        print "No such action."
+    except actions.BadValueException as e:
         print e.message
+    except actions.IncorrectNumberOfArgumentsException:
+        print "Incorrect number of arguments"
+    except actions.BadActionArgumentException as e:
+        print "Incorrect argument type:", e.message
+    except actions.NonExistentProjectException:
+        print "Project does not exist."
+
+def action_name_with_arguments(args):
+    """Strip script name from arg string
+
+    >>> action_name_with_arguments(["px.py", "add"])
+    ('add', [])
+
+    >>> action_name_with_arguments(["px.py", "add", "8"])
+    ('add', ['8'])
+
+    >>> action_name_with_arguments(["px.py"])
+    Traceback (most recent call last):
+    ...
+    MissingArgumentException
+
+    >>> action_name_with_arguments([])
+    Traceback (most recent call last):
+    ...
+    MissingArgumentException
+    """
+
+    try:
+        del args[0]
+        action = args.pop(0)
+        return action, args
+    except IndexError:
+        raise MissingArgumentException()
 
 def usage_info():
     return """\
@@ -21,5 +56,6 @@ def usage_info():
         del [hours] [date] [project name]
         """
 
-def action_argument(args):
-    return args.pop(0)
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
