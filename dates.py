@@ -25,6 +25,8 @@ class DateHandler:
                 try:
                     week = {
                         'tw': DateHandler.current_week(),
+                        'nw': DateHandler.next_week(),
+                        'lw': DateHandler.last_week()
                         }[alias]
                     return DateHandler.week_with_offset(week, offset)
                 except:
@@ -83,7 +85,7 @@ class DateHandler:
 
     @staticmethod
     def today():
-        return datetime.today()
+        return date.today()
 
     @staticmethod
     def tomorrow():
@@ -100,6 +102,16 @@ class DateHandler:
         return date.today().isocalendar()[1]
 
     @staticmethod
+    def next_week():
+        d = date.today() + timedelta(days=7)
+        return d.isocalendar()[1]
+
+    @staticmethod
+    def last_week():
+        d = date.today() - timedelta(days=7)
+        return d.isocalendar()[1]
+
+    @staticmethod
     def date_from_weekday(day):
         weekday = day.lower()
 
@@ -108,7 +120,7 @@ class DateHandler:
         if weekday not in weekdays:
             return None
 
-        today_index = datetime.today().weekday()
+        today_index = date.today().weekday()
         weekday_index = weekdays.index(weekday)
         index_diff = weekday_index - today_index
         new_date = date.today() + timedelta(days=index_diff)
