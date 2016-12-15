@@ -180,6 +180,7 @@ class Del(WriteAction):
         print "Deleted %d hours to project %s for date %s." % (hours, str(project), str(date))
 
 class Show(ReadAction):
+
     def perform_if_valid_arguments(self, args):
         week, date, project = self.get_validated_arguments(args)
 
@@ -201,15 +202,17 @@ class Show(ReadAction):
         print "For project " + project
 
 class Hours(ReadAction):
+    
     def perform_if_valid_arguments(self, args):
-        valid_args = self.get_validated_arguments(args)
+        week, date, project = self.get_validated_arguments(args)
 
-        desc = valid_args[0]
+        if week is not None:
+            self._show_week(week)
+        elif date is not None:
+            self._show_date(date)
 
-        if desc == "week":
-            self._show_week(valid_args[1])
-        elif desc == "date":
-            self._show_date(valid_args[1])
+        if project is not None:
+            self._show_project(project)
 
     def _show_week(self, week):
         print "Showing hours for week " + str(week) + " ..."
