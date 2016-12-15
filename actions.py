@@ -169,7 +169,7 @@ class Add(WriteAction):
         self._add(hours, date, project)
 
     def _add(self, hours, date, project):
-        print "Added %d hours to project %s for date %s." % (hours, str(project), str(date))
+        print "Added {} hours to project {} for date {}.".format(hours, str(project), str(date))
 
 class Del(WriteAction):
     def perform_if_valid_arguments(self, args):
@@ -177,7 +177,7 @@ class Del(WriteAction):
         self._del(hours, date, project)
 
     def _del(self, hours, date, project):
-        print "Deleted %d hours to project %s for date %s." % (hours, str(project), str(date))
+        print "Deleted {} hours from project {} for date {}.".format(hours, str(project), str(date))
 
 class Show(ReadAction):
 
@@ -202,7 +202,7 @@ class Show(ReadAction):
         print "For project " + project
 
 class Hours(ReadAction):
-    
+
     def perform_if_valid_arguments(self, args):
         week, date, project = self.get_validated_arguments(args)
 
