@@ -27,22 +27,8 @@ def execute(action_name, args):
     action.perform_if_valid_arguments(args)
 
 def get_action(arg):
-    """Return proper action instance
+    """Return proper action instance"""
 
-    >>> obj = get_action('add')
-    >>> isinstance(obj, Add)
-    True
-
-    >>> get_action('')
-    Traceback (most recent call last):
-    ...
-    InvalidActionException
-
-    >>> get_action(2)
-    Traceback (most recent call last):
-    ...
-    InvalidActionException
-    """
     try:
         return {
         'add': Add,
@@ -78,15 +64,6 @@ class ReadAction(Action):
         return week, date, project
 
     def count_arguments(self, args, expected_argument_range):
-        """
-        >>> ReadAction().count_arguments([1,2,3], range(1,4)) is None
-        True
-
-        >>> ReadAction().count_arguments([], range(1,4))
-        Traceback (most recent call last):
-        ...
-        IncorrectNumberOfArgumentsException
-        """
         if len(args) not in expected_argument_range:
             raise IncorrectNumberOfArgumentsException("Incorrect number of arguments.")
 
@@ -117,15 +94,6 @@ class WriteAction(Action):
         return (hours, date, project)
 
     def count_arguments(self, args, expected_argument_count):
-        """
-        >>> WriteAction().count_arguments([1,2,3], 3) is None
-        True
-
-        >>> WriteAction().count_arguments([1,2], 3)
-        Traceback (most recent call last):
-        ...
-        IncorrectNumberOfArgumentsException
-        """
         if len(args) is not expected_argument_count:
             raise IncorrectNumberOfArgumentsException("Incorrect number of arguments.")
 
