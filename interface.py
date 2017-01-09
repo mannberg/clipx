@@ -23,24 +23,7 @@ def parse_input(args):
         print "Project does not exist."
 
 def action_name_with_arguments(args):
-    """Strip script name from arg string
-
-    >>> action_name_with_arguments(["px.py", "add"])
-    ('add', [])
-
-    >>> action_name_with_arguments(["px.py", "add", "8"])
-    ('add', ['8'])
-
-    >>> action_name_with_arguments(["px.py"])
-    Traceback (most recent call last):
-    ...
-    MissingArgumentException
-
-    >>> action_name_with_arguments([])
-    Traceback (most recent call last):
-    ...
-    MissingArgumentException
-    """
+    """Strip script name from arg string"""
 
     try:
         del args[0]
@@ -55,7 +38,3 @@ def usage_info():
         add [hours] [date] [project name]
         del [hours] [date] [project name]
         """
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

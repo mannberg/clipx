@@ -11,22 +11,6 @@ class Parser:
 
     @staticmethod
     def week(arg):
-        """
-        >>> Parser.week("22")
-        22
-
-        >>> Parser.week(22)
-        22
-
-        >>> tw = Parser.week('tw')
-        >>> isinstance(tw, int)
-        True
-
-        >>> Parser.week('td')
-        Traceback (most recent call last):
-        ...
-        BadFormatException
-        """
         arg = str(arg)
         stripped_arg, offset = Parser.argument_with_offset(arg)
         week_from_alias = DateHandler.week_from_alias(stripped_arg, offset)
@@ -42,26 +26,6 @@ class Parser:
 
     @staticmethod
     def date(arg):
-        """
-        >>> Parser.date("22/10/2016")
-        datetime.date(2016, 10, 22)
-
-        >>> Parser.date("22/10/2016+1")
-        datetime.date(2016, 10, 23)
-
-        >>> Parser.date("22/10/2016-1")
-        datetime.date(2016, 10, 21)
-
-        >>> date = Parser.date("today-1")
-        >>> import datetime
-        >>> isinstance(date, datetime.date)
-        True
-
-        >>> date = Parser.date("thisday-1")
-        Traceback (most recent call last):
-        ...
-        BadFormatException
-        """
         stripped_arg, offset = Parser.argument_with_offset(arg)
         transformed_offset = DateHandler.day_offset_from_alias(stripped_arg, offset)
         date_from_alias = DateHandler.date_from_alias(stripped_arg, transformed_offset)
