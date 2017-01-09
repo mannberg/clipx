@@ -43,27 +43,6 @@ class Parser:
 
     @staticmethod
     def argument_with_offset(arg):
-        """
-        >>> Parser.argument_with_offset("abc-10")
-        ('abc', -10)
-
-        >>> Parser.argument_with_offset("abc+3")
-        ('abc', 3)
-
-        >>> Parser.argument_with_offset("abc123")
-        ('abc123', None)
-
-        >>> Parser.argument_with_offset("+")
-        ('+', None)
-
-        >>> Parser.argument_with_offset("+++")
-        ('+++', None)
-
-        >>> Parser.argument_with_offset(2)
-        Traceback (most recent call last):
-        ...
-        BadFormatException
-        """
         try:
             divisor_index = [i for i, v in enumerate(arg) if '+' in v or '-' in v][0]
             offset = int(arg[divisor_index:])
@@ -75,25 +54,12 @@ class Parser:
             raise BadFormatException("Expected string, got int")
 
     @staticmethod
-    def project(arg):
-        """
-        >>> Parser.project('pple')
-        'apple'
-
-        >>> Parser.project('xxx')
-        Traceback (most recent call last):
-        ...
-        NonExistentProjectException
-
-        >>> Parser.project(2)
-        Traceback (most recent call last):
-        ...
-        NonExistentProjectException
-        """
-
+    def project(arg, projects=None):
         arg = str(arg)
 
-        projects = ['apple', 'microsoft']
+        if projects is None:
+            projects = ['apple', 'microsoft']
+
         for p in projects:
             if p.find(arg.lower()) != -1:
                 return p
@@ -102,15 +68,6 @@ class Parser:
 
     @staticmethod
     def hours(arg):
-        """
-        >>> Parser.hours(2)
-        2
-
-        >>> Parser.hours('abc')
-        Traceback (most recent call last):
-        ...
-        BadFormatException
-        """
         try:
             hours = int(arg)
             return hours

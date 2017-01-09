@@ -19,4 +19,26 @@ class TestParsing(unittest.TestCase):
         with self.assertRaises(parsing.BadFormatException):
             parsing.Parser.date("thisday-1")
 
+    def test_argument_with_offset(self):
+        self.assertEqual(parsing.Parser.argument_with_offset("abc-10"), ('abc', -10))
+        self.assertEqual(parsing.Parser.argument_with_offset("abc+3"), ('abc', 3))
+        self.assertEqual(parsing.Parser.argument_with_offset("abc123"), ('abc123', None))
+        self.assertEqual(parsing.Parser.argument_with_offset("+"), ('+', None))
+        self.assertEqual(parsing.Parser.argument_with_offset("+++"), ('+++', None))
+        with self.assertRaises(parsing.BadFormatException):
+            parsing.Parser.argument_with_offset(2)
+
+    def test_hours(self):
+        self.assertEqual(parsing.Parser.hours(2), 2)
+        with self.assertRaises(parsing.BadFormatException):
+            parsing.Parser.hours('abc')
+
+    def test_project(self):
+        projects = ['apple', 'google']
+        self.assertEqual(parsing.Parser.project('pple', projects), 'apple')
+        with self.assertRaises(parsing.NonExistentProjectException):
+            parsing.Parser.project('xxx', projects)
+        with self.assertRaises(parsing.NonExistentProjectException):
+            parsing.Parser.project(2, projects)
+
 unittest.main()
