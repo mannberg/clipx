@@ -9,5 +9,7 @@ class TestInterface(unittest.TestCase):
             interface.action_name_with_arguments(["px.py"])
         with self.assertRaises(interface.MissingArgumentException):
             interface.action_name_with_arguments([])
+        with self.assertRaises(interface.InvalidInputException):
+            interface.action_name_with_arguments(2)
 
 unittest.main()

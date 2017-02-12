@@ -1,5 +1,8 @@
 from datetime import datetime, date, timedelta
 
+class BadValueException(Exception):
+    pass
+
 class DateHandler:
 
     @staticmethod
@@ -7,8 +10,8 @@ class DateHandler:
 
         alias = DateHandler.weekday_from_alias(alias)
         if alias in DateHandler.weekdays():
-            date = DateHandler.date_from_weekday(alias)
-            return DateHandler.date_with_day_offset(date, offset)
+            date = DateHandler._date_from_weekday(alias)
+            return DateHandler._date_with_day_offset(date, offset)
 
         try:
             date = {
@@ -16,7 +19,7 @@ class DateHandler:
                 'tomorrow': DateHandler.tomorrow(),
                 'yesterday': DateHandler.yesterday()
                 }[alias]
-            return DateHandler.date_with_day_offset(date, offset)
+            return DateHandler._date_with_day_offset(date, offset)
         except:
             return None
 
@@ -28,7 +31,7 @@ class DateHandler:
                         'nw': DateHandler.next_week(),
                         'lw': DateHandler.last_week()
                         }[alias]
-                    return DateHandler.week_with_offset(week, offset)
+                    return DateHandler._week_with_offset(week, offset)
                 except:
                     return None
 
@@ -68,17 +71,23 @@ class DateHandler:
 
     @staticmethod
     def date_from_string(string, frmt, offset=None):
-        date = datetime.strptime(string, frmt).date()
-        return DateHandler.date_with_day_offset(date, offset)
+        try:
+            if not all((string, frmt)):
+                raise BadValueException
+
+            date = datetime.strptime(string, frmt).date()
+            return DateHandler._date_with_day_offset(date, offset)
+        except (TypeError, BadValueException):
+            return None
 
     @staticmethod
-    def date_with_day_offset(date, offset):
+    def _date_with_day_offset(date, offset):
         if offset is not None:
             date = date + timedelta(days=offset)
         return date
 
     @staticmethod
-    def week_with_offset(week, offset):
+    def _week_with_offset(week, offset):
         if offset is not None:
             week = week + offset
         return week
@@ -112,7 +121,7 @@ class DateHandler:
         return d.isocalendar()[1]
 
     @staticmethod
-    def date_from_weekday(day):
+    def _date_from_weekday(day):
         weekday = day.lower()
         weekdays = DateHandler.weekdays()
 

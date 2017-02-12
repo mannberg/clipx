@@ -10,6 +10,10 @@ class TestParsing(unittest.TestCase):
         self.assertTrue(isinstance(parsing.Parser.week('tw'), int))
         with self.assertRaises(parsing.BadFormatException):
             parsing.Parser.week('td')
+        with self.assertRaises(parsing.BadFormatException):
+            parsing.Parser.week(-1)
+        with self.assertRaises(parsing.BadFormatException):
+            parsing.Parser.week(128)
 
     def test_date(self):
         self.assertEqual(parsing.Parser.date("22/10/2016"), datetime.date(2016, 10, 22))

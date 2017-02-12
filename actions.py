@@ -1,4 +1,5 @@
 import sys
+from abc import ABCMeta, abstractmethod
 from dates import DateHandler
 from parsing import Parser
 import parsing
@@ -23,10 +24,10 @@ class NonExistentProjectException(ActionException):
     pass
 
 def execute(action_name, args):
-    action = get_action(action_name)
+    action = _get_action(action_name)
     action.perform_if_valid_arguments(args)
 
-def get_action(arg):
+def _get_action(arg):
     """Return proper action instance"""
 
     try:
@@ -35,18 +36,50 @@ def get_action(arg):
         'del': Del,
         'show': Show,
         'hours': Hours
-        }[arg]()
-    except KeyError:
+        }[arg.lower()]()
+    except (KeyError, AttributeError):
         raise InvalidActionException("Action " + str(arg) + " does not exist.")
 
 class Action(object):
-    pass
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def get_validated_arguments():
+        pass
+
+    @abstractmethod
+    def perform_if_valid_arguments():
+        pass
+
+    @abstractmethod
+    def _validate_arguments():
+        pass
+
+    @abstractmethod
+    def _count_arguments():
+        pass
+
+    def validate_hours(self, hours):
+        if hours < 0:
+            raise BadValueException("Hours cannot be negative.")
+        elif hours >= 99:
+            raise BadValueException("Too many hours, man!")
+
+    def validate_date(self, date):
+        if date.year > 2020:
+            raise BadValueException("Too far in the future, man...")
+
+    def validate_project(self, project):
+        if project < 0:
+            raise BadValueException("Project doesn't exist.")
 
 class ReadAction(Action):
 
-    def get_validated_arguments(self, args):
+    def perform_if_valid_arguments():
+        pass
 
-        self.count_arguments(args, range(1,3))
+    def get_validated_arguments(self, args):
+        self._count_arguments(args, range(1,3))
         week = self._get_parsed_week(args[0])
         date = self._get_parsed_date(args[0])
         project = None
@@ -61,11 +94,19 @@ class ReadAction(Action):
         except parsing.NonExistentProjectException:
             raise NonExistentProjectException("")
 
+        self._validate_arguments(date, project)
         return week, date, project
 
-    def count_arguments(self, args, expected_argument_range):
+    def _count_arguments(self, args, expected_argument_range):
         if len(args) not in expected_argument_range:
             raise IncorrectNumberOfArgumentsException("Incorrect number of arguments.")
+
+    def _validate_arguments(self, date, project):
+        try:
+            self.validate_date(date)
+            self.validate_project(project)
+        except parsing.BadFormatException as e:
+            raise BadActionArgumentException(e.message)
 
     def _get_parsed_week(self, arg):
         try:
@@ -76,7 +117,7 @@ class ReadAction(Action):
     def _get_parsed_date(self, arg):
         try:
             return Parser.date(arg)
-        except parsing.BadFormatException as e:
+        except parsing.BadFormatException:
             return None
 
     def _get_parsed_project(self, arg):
@@ -87,18 +128,17 @@ class ReadAction(Action):
 
 class WriteAction(Action):
 
+    def perform_if_valid_arguments():
+        pass
+
     def get_validated_arguments(self, args):
-        self.count_arguments(args, 3)
         hours, date, project = self._get_parsed_arguments(args)
         self._validate_arguments(hours, date, project)
         return (hours, date, project)
 
-    def count_arguments(self, args, expected_argument_count):
-        if len(args) is not expected_argument_count:
-            raise IncorrectNumberOfArgumentsException("Incorrect number of arguments.")
-
     def _get_parsed_arguments(self, args):
         try:
+            self._count_arguments(args, 3)
             hours = Parser.hours(args[0])
             date = Parser.date(args[1])
             project = Parser.project(args[2])
@@ -108,27 +148,17 @@ class WriteAction(Action):
         except parsing.NonExistentProjectException:
             raise NonExistentProjectException("")
 
+    def _count_arguments(self, args, expected_argument_count):
+        if len(args) is not expected_argument_count:
+            raise IncorrectNumberOfArgumentsException("Incorrect number of arguments.")
+
     def _validate_arguments(self, hours, date, project):
         try:
-            self._validate_hours(hours)
-            self._validate_date(date)
-            self._validate_project(project)
+            self.validate_hours(hours)
+            self.validate_date(date)
+            self.validate_project(project)
         except parsing.BadFormatException as e:
             raise BadActionArgumentException(e.message)
-
-    def _validate_hours(self, hours):
-        if hours < 0:
-            raise BadValueException("Hours cannot be negative.")
-        elif hours >= 99:
-            raise BadValueException("Too many hours, man!")
-
-    def _validate_date(self, date):
-        if date.year > 2020:
-            raise BadValueException("Too far in the future, man...")
-
-    def _validate_project(self, project):
-        if project < 0:
-            raise BadValueException("Project doesn't exist.")
 
 class Add(WriteAction):
 
@@ -140,6 +170,7 @@ class Add(WriteAction):
         print "Added {} hours to project {} for date {}.".format(hours, str(project), str(date))
 
 class Del(WriteAction):
+
     def perform_if_valid_arguments(self, args):
         hours, date, project = self.get_validated_arguments(args)
         self._del(hours, date, project)
@@ -190,7 +221,3 @@ class Hours(ReadAction):
 
     def _show_project(self, project):
         print "For project " + project
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

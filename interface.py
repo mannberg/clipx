@@ -5,11 +5,14 @@ import actions
 class MissingArgumentException(Exception):
     pass
 
+class InvalidInputException(Exception):
+    pass
+
 def parse_input(args):
     try:
         action_name, args = action_name_with_arguments(args)
         actions.execute(action_name, args)
-    except MissingArgumentException:
+    except (MissingArgumentException, InvalidInputException):
         print usage_info()
     except actions.InvalidActionException:
         print "No such action."
@@ -31,6 +34,8 @@ def action_name_with_arguments(args):
         return action, args
     except IndexError:
         raise MissingArgumentException()
+    except TypeError:
+        raise InvalidInputException()
 
 def usage_info():
     return """\

@@ -21,6 +21,8 @@ class Parser:
             week = int(stripped_arg)
             if week in range(1,53):
                 return week
+            else:
+                raise BadFormatException("Not a valid week")
         except ValueError:
             raise BadFormatException("Not a valid week")
 
@@ -73,8 +75,3 @@ class Parser:
             return hours
         except:
             raise BadFormatException("Not valid hours")
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
