@@ -34,7 +34,15 @@ class Parser:
         if date_from_alias is not None:
             return date_from_alias
 
-        for frmt in ("%d-%m-%Y", "%d.%m.%Y", "%d/%m/%Y"):
+        valid_date_formats = [
+            "%d-%m-%Y",
+            "%d.%m.%Y",
+            "%d/%m/%Y",
+            "%Y-%m-%d",
+            "%Y.%m.%d",
+            "%Y/%m/%d"
+        ]
+        for frmt in valid_date_formats:
             try:
                 date = DateHandler.date_from_string(stripped_arg, frmt, transformed_offset)
                 return date
@@ -46,7 +54,12 @@ class Parser:
     @staticmethod
     def argument_with_offset(arg):
         try:
-            divisor_index = [i for i, v in enumerate(arg) if '+' in v or '-' in v][0]
+            divisor_index = arg.rfind('+')
+            if divisor_index is -1 and arg.count('-') is not 2:
+                divisor_index = arg.rfind('-')
+            if divisor_index is -1:
+                raise ValueError
+
             offset = int(arg[divisor_index:])
             stripped_arg = arg[:divisor_index]
             return stripped_arg, offset

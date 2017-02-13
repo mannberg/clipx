@@ -103,8 +103,10 @@ class ReadAction(Action):
 
     def _validate_arguments(self, date, project):
         try:
-            self.validate_date(date)
-            self.validate_project(project)
+            if date is not None:
+                self.validate_date(date)
+            if project is not None:
+                self.validate_project(project)
         except parsing.BadFormatException as e:
             raise BadActionArgumentException(e.message)
 
