@@ -34,6 +34,7 @@ def _get_action(arg):
         return {
         'add': Add,
         'del': Del,
+        'set': Set,
         'show': Show,
         'hours': Hours
         }[arg.lower()]()
@@ -179,6 +180,15 @@ class Del(WriteAction):
 
     def _del(self, hours, date, project):
         print "Deleted {} hours from project {} for date {}.".format(hours, str(project), str(date))
+
+class Set(WriteAction):
+
+    def perform_if_valid_arguments(self, args):
+        hours, date, project = self.get_validated_arguments(args)
+        self._set(hours, date, project)
+
+    def _set(self, hours, date, project):
+        print "Set project {} to {} hours for date {}.".format(str(project), hours, str(date))
 
 class Show(ReadAction):
 
