@@ -65,7 +65,7 @@ class Parser:
             return stripped_arg, offset
         except (ValueError, IndexError):
             return arg, None
-        except TypeError:
+        except (TypeError, AttributeError):
             raise BadFormatException("Expected string, got int")
 
     @staticmethod
