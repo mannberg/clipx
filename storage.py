@@ -20,6 +20,9 @@ def add_project(project, success_callback):
     connection = sqlite3.connect('px.db')
     c = connection.cursor()
     try:
+        if project_exists(project):
+            print "Project exists, foo"
+            return
         t = (project,)
         c.execute('INSERT INTO projects (name) VALUES (?)', t)
         connection.commit()
@@ -35,17 +38,25 @@ def list_projects():
     connection = sqlite3.connect('px.db')
     c = connection.cursor()
     for row in c.execute('SELECT * FROM projects'):
-        print row
+        print row[1]
 
-def _set_hours(hours, project, date):
+def set_hours(hours, project, date):
     connection = sqlite3.connect('px.db')
     c = connection.cursor()
     #Get project id from name
     #Update workdays with hours where id=x and date=y
 
-def _get_project_id(project):
+def get_project_id(project):
     connection = sqlite3.connect('px.db')
     c = connection.cursor()
     t = (project + "%",)
     for row in c.execute('SELECT * FROM projects WHERE name LIKE ?', t):
         print row
+
+def project_exists(project):
+    connection = sqlite3.connect('px.db')
+    c = connection.cursor()
+    t = (project,)
+    c.execute('SELECT * FROM projects WHERE name LIKE ?', t)
+    response = c.fetchall()
+    return len(response) > 0
