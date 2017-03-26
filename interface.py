@@ -40,6 +40,5 @@ def action_name_with_arguments(args):
 def usage_info():
     return """\
     Usage: px [OPTIONS]
-        add [hours] [date] [project name]
-        del [hours] [date] [project name]
+        set [hours] [date] [project name]
         """

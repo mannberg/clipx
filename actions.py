@@ -33,8 +33,6 @@ def _get_action(arg):
 
     try:
         return {
-        'add': Add,
-        'del': Del,
         'set': Set,
         'show': Show,
         'hours': Hours,
@@ -169,24 +167,6 @@ class WriteAction(Action):
             self.validate_project(project)
         except parsing.BadFormatException as e:
             raise BadActionArgumentException(e.message)
-
-class Add(WriteAction):
-
-    def perform_if_valid_arguments(self, args):
-        hours, date, project = self.get_valid_arguments(args)
-        self._add(hours, date, project)
-
-    def _add(self, hours, date, project):
-        print "Added {} hours to project {} for date {}.".format(hours, str(project), str(date))
-
-class Del(WriteAction):
-
-    def perform_if_valid_arguments(self, args):
-        hours, date, project = self.get_valid_arguments(args)
-        self._del(hours, date, project)
-
-    def _del(self, hours, date, project):
-        print "Deleted {} hours from project {} for date {}.".format(hours, str(project), str(date))
 
 class Set(WriteAction):
 
