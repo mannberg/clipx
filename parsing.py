@@ -4,9 +4,6 @@ class BadFormatException(Exception):
     def __init__(self, arg):
         self.message = arg
 
-class NonExistentProjectException(Exception):
-    pass
-
 class Parser:
 
     @staticmethod
@@ -70,21 +67,16 @@ class Parser:
 
     @staticmethod
     def project(arg, projects=None):
-        arg = str(arg)
-
-        if projects is None:
-            projects = ['apple', 'microsoft']
-
-        for p in projects:
-            if p.find(arg.lower()) != -1:
-                return p
-
-        raise NonExistentProjectException()
+        try:
+            project = str(arg)
+            return project
+        except:
+            raise BadFormatException("Not valid project name")
 
     @staticmethod
     def hours(arg):
         try:
-            hours = int(arg)
+            hours = abs(int(arg))
             return hours
         except:
             raise BadFormatException("Not valid hours")

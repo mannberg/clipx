@@ -81,6 +81,19 @@ class DateHandler:
             return None
 
     @staticmethod
+    def dates_in_week(week):
+        dates = []
+        week_string = "2017-W{}".format(str(week))
+
+        for x in range(1, 8):
+            if x == 7:
+                x = 0
+            w = '-{}'.format(x)
+            date = datetime.strptime(week_string + w, "%Y-W%W-%w").date()
+            dates.append(date)
+        return dates
+
+    @staticmethod
     def _date_with_day_offset(date, offset):
         if offset is not None:
             date = date + timedelta(days=offset)

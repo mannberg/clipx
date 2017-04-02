@@ -10,6 +10,9 @@ class WriteError(StorageException):
 class NonExistentProjectError(StorageException):
     pass
 
+class NoWorkdaysForDateError(StorageException):
+    pass
+
 def setup():
     connection = sqlite3.connect('px.db')
     c = connection.cursor()
@@ -19,7 +22,7 @@ def setup():
     connection.commit()
     connection.close()
 
-def add_project(project, success_callback):
+def add_project(project):
     connection = sqlite3.connect('px.db')
     c = connection.cursor()
     try:
@@ -29,7 +32,6 @@ def add_project(project, success_callback):
         t = (project,)
         c.execute('INSERT INTO projects (name) VALUES (?)', t)
         connection.commit()
-        success_callback()
     except sqlite3.OperationalError:
         raise WriteError("Error writing data")
     except TypeError:
@@ -60,7 +62,8 @@ def delete_workdays():
     connection.commit()
     connection.close()
 
-def set_hours(hours, project, date):
+def set_hours(hours, date, project):
+    setup()
     connection = sqlite3.connect('px.db')
     c = connection.cursor()
     pid = get_project_id(project)
@@ -71,6 +74,25 @@ def set_hours(hours, project, date):
     connection.commit()
     connection.close()
 
+def show_date_for_project(date, project):
+    setup()
+    connection = sqlite3.connect('px.db')
+    c = connection.cursor()
+    pid = get_project_id(project)
+    if pid is None:
+        raise NonExistentProjectError('project ' + project + 'does not exist')
+    for row in c.execute('SELECT * FROM workdays WHERE project_id = ? AND date = ?', (pid, date)):
+        return row
+    raise NoWorkdaysForDateError("")
+
+def show_date(date):
+    setup()
+    connection = sqlite3.connect('px.db')
+    c = connection.cursor()
+    for row in c.execute('SELECT * FROM workdays WHERE date = ?', (date,)):
+        return row
+    raise NoWorkdaysForDateError("")
+
 def get_project_id(project):
     connection = sqlite3.connect('px.db')
     c = connection.cursor()
@@ -79,6 +101,7 @@ def get_project_id(project):
         return row[0]
 
 def project_exists(project):
+    setup()
     connection = sqlite3.connect('px.db')
     c = connection.cursor()
     t = (project,)

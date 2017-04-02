@@ -14,16 +14,12 @@ def parse_input(args):
         actions.execute(action_name, args)
     except (MissingArgumentException, InvalidInputException):
         print usage_info()
-    except actions.InvalidActionException:
-        print "No such action."
-    except actions.BadValueException as e:
+    except actions.InvalidActionException as e:
         print e.message
-    except actions.IncorrectNumberOfArgumentsException:
-        print "Incorrect number of arguments"
-    except actions.BadActionArgumentException as e:
-        print "Incorrect argument type:", e.message
-    except actions.NonExistentProjectException:
-        print "Project does not exist."
+    except actions.IncorrectNumberOfArgumentsException as e:
+        print e.message
+    except actions.BadArgumentException as e:
+        print e.message
 
 def action_name_with_arguments(args):
     """Strip script name from arg string"""
