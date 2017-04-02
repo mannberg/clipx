@@ -85,6 +85,17 @@ def show_date_for_project(date, project):
         return row
     raise NoWorkdaysForDateError("")
 
+def show_week_for_project(date, project):
+    setup()
+    connection = sqlite3.connect('px.db')
+    c = connection.cursor()
+    pid = get_project_id(project)
+    if pid is None:
+        raise NonExistentProjectError('project ' + project + 'does not exist')
+    for row in c.execute('SELECT * FROM workdays WHERE project_id = ? AND date = ?', (pid, date)):
+        return row
+    raise NoWorkdaysForDateError("")
+
 def show_date(date):
     setup()
     connection = sqlite3.connect('px.db')

@@ -4,7 +4,7 @@ import actions
 class TestActions(unittest.TestCase):
 
     def test_get_action(self):
-        self.assertTrue(isinstance(actions._get_action('add'), actions.Add))
+        self.assertTrue(isinstance(actions._get_action('set'), actions.Set))
         with self.assertRaises(actions.InvalidActionException):
             actions._get_action('')
         with self.assertRaises(actions.InvalidActionException):
@@ -18,20 +18,6 @@ class TestActions(unittest.TestCase):
         with self.assertRaises(actions.IncorrectNumberOfArgumentsException):
             actions.WriteAction()._count_arguments([1,2], 3)
 
-    def test_add(self):
-        try:
-            actions.execute('add', ['8', 'today', 'apple'])
-        except:
-            raise
-            self.fail()
-
-    def test_del(self):
-        try:
-            actions.execute('del', ['8', 'today', 'apple'])
-        except:
-            raise
-            self.fail()
-
     def test_set(self):
         try:
             actions.execute('set', ['8', 'today', 'apple'])
@@ -43,14 +29,6 @@ class TestActions(unittest.TestCase):
         try:
             actions.execute('show', ['today'])
             actions.execute('show', ['today', 'apple'])
-        except:
-            raise
-            self.fail()
-
-    def test_hours(self):
-        try:
-            actions.execute('hours', ['today'])
-            actions.execute('hours', ['today', 'apple'])
         except:
             raise
             self.fail()

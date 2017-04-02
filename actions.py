@@ -189,7 +189,7 @@ class Show(ReadAction):
         except storage.NonExistentProjectError:
             raise BadArgumentException("No project named {}".format(project))
         except storage.NoWorkdaysForDateError:
-            raise BadArgumentException("No days for date {}".format(str(date)))
+            print self.success_string(0, date)
         except IndexError:
             raise BadArgumentException("Something went wrong.")
 

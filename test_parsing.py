@@ -37,12 +37,4 @@ class TestParsing(unittest.TestCase):
         with self.assertRaises(parsing.BadFormatException):
             parsing.Parser.hours('abc')
 
-    def test_project(self):
-        projects = ['apple', 'google']
-        self.assertEqual(parsing.Parser.project('pple', projects), 'apple')
-        with self.assertRaises(parsing.NonExistentProjectException):
-            parsing.Parser.project('xxx', projects)
-        with self.assertRaises(parsing.NonExistentProjectException):
-            parsing.Parser.project(2, projects)
-
 unittest.main()
