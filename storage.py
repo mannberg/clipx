@@ -1,4 +1,5 @@
 import sqlite3
+import dates as datesmod
 
 class StorageException(Exception):
     def __init__(self, arg):
@@ -18,7 +19,7 @@ def setup():
     c = connection.cursor()
     c.execute('CREATE TABLE IF NOT EXISTS projects (id integer primary key, name text)')
     c.execute('''CREATE TABLE IF NOT EXISTS activities (id integer primary key, project_id integer NOT NULL, name text, FOREIGN KEY (project_id) REFERENCES projects(id))''')
-    c.execute('''CREATE TABLE IF NOT EXISTS workdays (project_id integer NOT NULL, number_of_hours integer NOT NULL, date DATE, activity_id integer NOT NULL, FOREIGN KEY (project_id) REFERENCES projects(id), FOREIGN KEY (activity_id) REFERENCES activities(id), UNIQUE(project_id, date))''')
+    c.execute('''CREATE TABLE IF NOT EXISTS workdays (project_id integer NOT NULL, number_of_hours integer NOT NULL, date timestamp, activity_id integer NOT NULL, FOREIGN KEY (project_id) REFERENCES projects(id), FOREIGN KEY (activity_id) REFERENCES activities(id), UNIQUE(project_id, date))''')
     connection.commit()
     connection.close()
 
@@ -85,16 +86,28 @@ def show_date_for_project(date, project):
         return row
     raise NoWorkdaysForDateError("")
 
-def show_week_for_project(date, project):
+def show_dates_for_week_and_project(week, project):
     setup()
     connection = sqlite3.connect('px.db')
     c = connection.cursor()
     pid = get_project_id(project)
     if pid is None:
         raise NonExistentProjectError('project ' + project + 'does not exist')
-    for row in c.execute('SELECT * FROM workdays WHERE project_id = ? AND date = ?', (pid, date)):
-        return row
-    raise NoWorkdaysForDateError("")
+
+    dates = datesmod.DateHandler.dates_in_week(week)
+    workdays = []
+    for date in dates:
+        c.execute('SELECT * FROM workdays WHERE project_id = ? AND date = ?', (pid, date))
+        result = c.fetchall()
+        if result:
+            workdays.append(result[0])
+        else:
+            workdays.append((2, 0, date, 0))
+
+    if workdays:
+        return workdays
+    else:
+        raise NoWorkdaysForDateError("")
 
 def show_date(date):
     setup()
@@ -103,6 +116,41 @@ def show_date(date):
     for row in c.execute('SELECT * FROM workdays WHERE date = ?', (date,)):
         return row
     raise NoWorkdaysForDateError("")
+
+def show_dates_for_week(week):
+    setup()
+    connection = sqlite3.connect('px.db')
+    c = connection.cursor()
+
+    dates = datesmod.DateHandler.dates_in_week(week)
+    rows = []
+    workdays_for_project = dict()
+    projectids = set()
+    #TODO: Improve crappy algorithm
+    for date in dates:
+        c.execute('SELECT * FROM workdays WHERE date = ?', (date,))
+        days = c.fetchall()
+
+        for day in days:
+            pid = day[0]
+            projectids.add(pid)
+
+    for date in dates:
+        c.execute('SELECT * FROM workdays WHERE date = ?', (date,))
+        days = c.fetchall()
+
+        for key in projectids:
+            workdays_for_project.setdefault(key, dict())[date] = 0
+
+        for day in days:
+            pid = day[0]
+            hours = day[1]
+            workdays_for_project[pid][date] = hours
+
+    if workdays_for_project:
+        return workdays_for_project
+    else:
+        raise NoWorkdaysForDateError("")
 
 def get_project_id(project):
     connection = sqlite3.connect('px.db')

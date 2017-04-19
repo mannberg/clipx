@@ -171,12 +171,28 @@ class Show(ReadAction):
     def perform_if_valid_arguments(self, args):
         week, date, project = self.validate_arguments(args)
         if week is not None:
-            self._show_week(week)
+            self._show_week(week, project)
         elif date is not None:
             self._show_date(date, project)
 
-    def _show_week(self, week):
-        print "Showing week " + str(week) + " ..."
+    def _show_week(self, week, project):
+        try:
+            if project is not None:
+                workdays = storage.show_dates_for_week_and_project(week, project)
+                print self.success_string_specific_project(workdays)
+            else:
+                workdays = storage.show_dates_for_week(week)
+                print self.success_string_all_projects(workdays)
+
+            if workdays is None:
+                raise IndexError
+
+        except storage.NonExistentProjectError:
+            raise BadArgumentException("No project named {}".format(project))
+        except storage.NoWorkdaysForDateError:
+            pass
+        except IndexError:
+            raise BadArgumentException("Something went wrong.")
 
     def _show_date(self, date, project):
         try:
@@ -198,6 +214,25 @@ class Show(ReadAction):
             return "### {} : {} hours ###".format(str(date), str(hours))
         except:
             pass
+
+    def success_string_specific_project(self, days):
+        try:
+            string = "\n"
+            for day in days:
+                string += "### Project: {} - {} : {} hours ###\n".format(str(day[0]), str(day[2]), str(day[1]))
+            return string
+        except:
+            raise
+
+    def success_string_all_projects(self, days):
+        try:
+            string = "\n"
+            for pid, hours in days.iteritems():
+                for date, hour in hours.iteritems():
+                    string += "### Project: {} - {} : {} hours ###\n".format(str(pid), date, str(hour))
+            return string
+        except:
+            raise
 
 class Workday():
     def __init__(self, hours, date, project_name):
