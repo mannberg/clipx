@@ -14,16 +14,12 @@ def parse_input(args):
         actions.execute(action_name, args)
     except (MissingArgumentException, InvalidInputException):
         print usage_info()
-    except actions.InvalidActionException as e:
-        print e.message
-    except actions.IncorrectNumberOfArgumentsException as e:
-        print e.message
-    except actions.BadArgumentException as e:
+    except actions.ActionException as e:
         print e.message
 
 def action_name_with_arguments(args):
-    """Strip script name from arg string"""
-
+    """Strip script name & arguments from arg string"""
+    
     try:
         del args[0]
         action = args.pop(0)
