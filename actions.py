@@ -38,19 +38,8 @@ def _get_action(arg):
         raise InvalidActionException("Action " + str(arg) + " does not exist.")
 
 class Action(object):
-    __metaclass__ = ABCMeta
 
-    @abstractmethod
-    def perform_if_valid_arguments():
-        pass
-
-    @abstractmethod
-    def validate_arguments():
-        pass
-
-    @abstractmethod
-    def _parse_arguments():
-        pass
+    description = ""
 
     def _count_arguments(self, args, expected_argument_count):
         if len(args) is not expected_argument_count:
@@ -62,17 +51,13 @@ class Action(object):
 
 class ReadAction(Action):
 
-    def perform_if_valid_arguments(self, args):
-        pass
-
-    def validate_arguments(self, args):
+    def _validate_arguments(self, args):
         self._count_arguments_range(args, range(1,3))
         week, date, project = self._parse_arguments(args)
         return week, date, project
 
     def _parse_arguments(self, args):
         week = date = project = None
-
         try:
             week = Parser.week(args[0])
         except parsing.BadFormatException:
@@ -95,10 +80,7 @@ class ReadAction(Action):
 
 class WriteAction(Action):
 
-    def perform_if_valid_arguments(self, args):
-        pass
-
-    def validate_arguments(self, args):
+    def _validate_arguments(self, args):
         self._count_arguments(args, 3)
         hours, date, project = self._parse_arguments(args)
         return hours, date, project
@@ -115,7 +97,7 @@ class WriteAction(Action):
 class Set(WriteAction):
 
     def perform_if_valid_arguments(self, args):
-        hours, date, project = self.validate_arguments(args)
+        hours, date, project = self._validate_arguments(args)
         self._set(hours, date, project)
 
     def _set(self, hours, date, project):
@@ -127,16 +109,16 @@ class Set(WriteAction):
 class AddProject(Action):
 
     def perform_if_valid_arguments(self, args):
-        project = self.validate_arguments(args)
+        project = self._validate_arguments(args)
         self._add_project(project)
 
     def _add_project(self, project):
         try:
             storage.add_project(project)
         except:
-            raise ExecutionFailureException
+            raise ExecutionFailureException("Failed to add project")
 
-    def validate_arguments(self, args):
+    def _validate_arguments(self, args):
         self._count_arguments(args, 1)
         project = self._parse_arguments(args)
         return project
@@ -151,20 +133,18 @@ class ListProjects(Action):
 
     def perform_if_valid_arguments(self, args):
         self._count_arguments(args, 0)
+        #TODO: Reading from DB should handle exceptions
         projects = storage.list_projects()
+        #TODO: This module should not print stuff?
         for p in projects:
             print p
 
-    def validate_arguments(self, project):
-        pass
-
-    def _parse_arguments(self, args):
-        pass
+    #Save point
 
 class Show(ReadAction):
 
     def perform_if_valid_arguments(self, args):
-        week, date, project = self.validate_arguments(args)
+        week, date, project = self._validate_arguments(args)
         if week is not None:
             self._show_week(week, project)
         elif date is not None:
