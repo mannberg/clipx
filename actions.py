@@ -60,11 +60,6 @@ class Action(object):
         if len(args) not in expected_argument_range:
             raise IncorrectNumberOfArgumentsException("Incorrect number of arguments.")
 
-    #TODO: Remove! Already done in Parser
-    def _validate_date(self, date):
-        if len(str(date.year)) is not 4:
-            raise BadArgumentException("Too far in the future, man...")
-
 class ReadAction(Action):
 
     def perform_if_valid_arguments(self, args):
